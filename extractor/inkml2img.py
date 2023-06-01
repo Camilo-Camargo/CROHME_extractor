@@ -19,6 +19,7 @@ def draw_trace(trace_grp, box_size, thickness):
 
 
 def inkml2img(source, out_dir, filename):
+    print(source, out_dir)
     # TODO: Add more sizes and more options...
     trace_grps = inkml.extract_trace_grps(source)
     for trace_grp in trace_grps:
@@ -40,7 +41,7 @@ def inkml2img(source, out_dir, filename):
                 x = traces[i][0] + offset
                 y = traces[i][1] + offset
 
-                draw.line([(x_0, y_0), (x, y)], width=20)
+                draw.line([(x_0, y_0), (x, y)], width=10)
 
         width, height = img.size
         aspect_ratio = width / height
@@ -55,7 +56,7 @@ def inkml2img(source, out_dir, filename):
         img = img.resize((new_width, new_height), Image.ANTIALIAS)
         final_img = Image.new('L', (28, 28), color=255)
         final_img.paste(img, ((28-new_width)//2, (28-new_height)//2))
-        out_dir_path = os.path.join(out_dir, f'{trace_grp["label"]}')
+        out_dir_path = f'{out_dir}/{trace_grp["label"]}'
 
         if not os.path.exists(out_dir_path):
             os.makedirs(out_dir_path)
