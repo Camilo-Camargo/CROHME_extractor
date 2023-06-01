@@ -66,8 +66,13 @@ def get_tracegrp_properties(trace_group):
         x_maxs.append(x_max)
         y_mins.append(y_min)
         y_maxs.append(y_max)
-    # print('X_min: {}; Y_min: {}; X_max: {}; Y_max: {}'.format(min(x_mins), min(y_mins), max(x_maxs), max(y_maxs)))
-    return min(x_mins), min(y_mins), max(x_maxs) - min(x_mins), max(y_maxs) - min(y_mins)
+
+    width_points = (min(x_mins),  max(x_maxs))
+    height_points = (min(y_mins), max(y_maxs))
+    width = width_points[1]-width_points[0]
+    height = height_points[1]-height_points[0]
+    x_min = min(x_mins)
+    return width_points, height_points, width, height
 
 
 def shift_trace_group(trace_grp, x_min, y_min):

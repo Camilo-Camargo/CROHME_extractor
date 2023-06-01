@@ -1,8 +1,8 @@
-from inkml import extract_trace_grps
+import inkml
 import os
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw
 
 
 def draw_trace(trace_grp, box_size, thickness):
@@ -19,20 +19,38 @@ def draw_trace(trace_grp, box_size, thickness):
 
 
 path = os.path.join(os.getcwd(), "equation.inkml")
-trace_grps = extract_trace_grps(path)
+trace_grps = inkml.extract_trace_grps(path)
 for trace_grp in trace_grps:
-    ls = trace_grp['traces']
-    for subls in ls:
-        data = np.array(subls)
-        x, y = zip(*data)
-        plt.plot(x, y, color='black')
-    plt.gca().invert_yaxis()
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.gca().get_xaxis().set_visible(False)
-    plt.gca().get_yaxis().set_visible(False)
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
-    plt.gca().spines['bottom'].set_visible(False)
-    plt.gca().spines['left'].set_visible(False)
-    #plt.savefig(f"{trace_grp['label']}.png", dpi=100)
-    plt.show()
+    x_points, y_points, width, height = inkml.get_tracegrp_properties(
+        trace_grp)
+    trace_grp = inkml.shift_trace_group(trace_grp, x_points[0], y_points[0])
+
+    # padding for all borders
+    padding = 30
+    img = Image.new('L', (width+padding, height+padding), color=255)
+    draw = ImageDraw.Draw(img)
+
+    offset = padding // 2
+    for traces in trace_grp["traces"]:
+        for i in range(1, len(traces)):
+            x_0 = traces[i-1][0] + offset
+            y_0 = traces[i-1][1] + offset
+            x = traces[i][0] + offset
+            y = traces[i][1] + offset
+
+            draw.line([(x_0, y_0), (x, y)], width=20)
+
+    width, height = img.size
+    aspect_ratio = width / height
+
+    new_width = new_height = 26
+
+    if aspect_ratio > 1:
+        new_height = round(new_width / aspect_ratio)
+    else:
+        new_width = round(new_height * aspect_ratio)
+
+    img = img.resize((new_width, new_height), Image.ANTIALIAS)
+    final_img = Image.new('L', (28, 28), color=255)
+    final_img.paste(img, ((28-new_width)//2, (28-new_height)//2))
+    final_img.save(f'CROHME_{trace_grp["label"]}_28x28.png')
