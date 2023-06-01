@@ -1,0 +1,2 @@
+run:
+	python extractor.py
